@@ -11,7 +11,7 @@ body {
   scroll-behavior: smooth;
 }
 
-/* FONTS (Optional - keeping brand fonts) */
+/* FONTS */
 @font-face {
     font-family: 'Consul';
     src: url('../static/fonts/Consul.ttf') format('truetype');
@@ -19,6 +19,10 @@ body {
 @font-face {
     font-family: 'DigitalGlitchDemo';
     src: url('../static/fonts/DigitalGlitchDemo.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'BoldItalic';
+    src: url('../static/fonts/BoldItalic.ttf') format('truetype');
 }
 
 /* GLOBAL */
@@ -54,26 +58,12 @@ header {
   text-decoration: none;
 }
 
-.logo-circle {
-  width: 50px;
-  height: 50px;
-  border: 3px solid #8a8f64;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #8a8f64;
-  font-weight: bold;
-  font-size: 10px;
-  text-align: center;
-  line-height: 1.1;
-}
-
 .logo-title h1 {
   color: #8a8f64;
-  font-size: 24px;
+  font-size: 42px;
   font-weight: 700;
   margin: 0;
+  font-family: 'BoldItalic', sans-serif;
 }
 
 nav {
@@ -181,7 +171,7 @@ button:hover {
     transform: scale(1.02);
 }
 
-/* SEARCH & FILTERS (From original estilos2) */
+/* SEARCH & FILTERS */
 .search-container {
   margin-bottom: 24px;
 }
@@ -249,15 +239,17 @@ button:hover {
 
 .product-info {
   padding: 20px;
-
 }
 
-.descuento {
-  background: #8a8f64; color: white;padding: 5px 12px; border-radius: 999px; font-weight: bold;
-
+.discount-badge {
+  background: #8a8f64;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: bold;
 }
 
-/* FORMS (Login/Registro/Modificar) */
+/* FORMS */
 .form_forma {
     max-width: 400px;
     margin: 40px auto;
@@ -326,7 +318,7 @@ button:hover {
   margin-bottom: 5px;
 }
 
-/* FOOTER */
+/* FOOTER / DETAIL GRID */
 .product-detail-grid {
   width: 100%;
   max-width: 1200px;
