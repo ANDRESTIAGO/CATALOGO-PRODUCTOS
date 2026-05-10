@@ -1,0 +1,76 @@
+{% extends 'base.html' %} 
+
+{% block title %} Catálogo de Productos {% endblock %}
+
+{% block content %}
+<section class="contenedor">
+    <h1 style="color: #8a8f64; text-align: center; margin-bottom: 40px; font-family: 'DigitalGlitchDemo', sans-serif;">MASTER SERIES</h1>
+
+    <!-- Buscador y Filtros -->
+    <div class="search-container">
+        <form action="/buscar" method="get" style="display: flex; gap: 10px;">
+            <input type="text" name="q" placeholder="Buscar por nombre o referencia..." class="search-input" value="{{ query or '' }}">
+            <button type="submit" style="width: auto; padding: 0 30px;">Buscar</button>
+        </form>
+    </div>
+
+    <div class="filters-container">
+        <form action="/buscar" method="get" id="filter-form" style="display: contents;">
+            <input type="hidden" name="q" value="{{ query or '' }}">
+            
+            <select name="categoria" class="filter-select" onchange="this.form.submit()">
+                <option value="">Todas las Categorías</option>
+                {% for cat in filtros.categorias %}
+                    <option value="{{ cat }}" {% if sel_cat == cat %}selected{% endif %}>{{ cat }}</option>
+                {% endfor %}
+            </select>
+
+            <select name="genero" class="filter-select" onchange="this.form.submit()">
+                <option value="">Todos los Géneros</option>
+                {% for gen in filtros.generos %}
+                    <option value="{{ gen }}" {% if sel_gen == gen %}selected{% endif %}>{{ gen }}</option>
+                {% endfor %}
+            </select>
+
+            <select name="deporte" class="filter-select" onchange="this.form.submit()">
+                <option value="">Todos los Deportes</option>
+                {% for dep in filtros.deportes %}
+                    <option value="{{ dep }}" {% if sel_dep == dep %}selected{% endif %}>{{ dep }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+
+    {% if mensaje %}
+        <div class="alert alert-info" style="text-align: center; padding: 20px;">{{ mensaje }}</div>
+    {% endif %}
+
+    <!-- Cuadrícula de Productos -->
+    <div class="products-grid">
+        {% for producto in productos %}
+        <div class="product-card">
+            <div class="product-image-wrapper" onclick="window.location.href='/producto/{{ producto.Referencia }}'">
+                <img src="{{ producto.Imagen }}" alt="{{ producto.nombre }}" class="product-image" onerror="this.src='/static/img/logo1.jpg'">
+                <div class="product-overlay"></div>
+                <div class="product-info">
+                    <p class="product-ref">REF: {{ producto.Referencia }}</p>
+                    <h3 class="product-name">{{ producto.nombre }}</h3>
+                    <div class="price-row">
+                        <span class="old-price">{{ producto['precio Antes'] }}</span>
+                        <span class="discount-badge">{{ producto['%DCTO'] }}</span>
+                    </div>
+                    <div class="current-price">{{ producto['Precio Ahora'] }}</div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if not productos and not mensaje %}
+        <div style="text-align: center; padding: 50px;">
+            <h3>No se encontraron productos que coincidan con la búsqueda.</h3>
+            <a href="/" style="color: #8a8f64; text-decoration: underline;">Ver todo el catálogo</a>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

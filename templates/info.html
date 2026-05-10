@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %} {{ producto.nombre }} - Detalle {% endblock %}
+
+{% block content %}
+<section class="contenedor" style="padding-top: 50px;">
+    <div class="card" style="width: 100%; max-width: 1200px; margin: auto; display: grid; grid-template-columns: 1fr 1fr; border-radius: 28px; overflow: hidden; background: white; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+        
+        <!-- Imagen del Producto -->
+        <div style="background: #f3f3f3; display: flex; align-items: center; justify-content: center;">
+            <img src="{{ producto.Imagen }}" alt="{{ producto.nombre }}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='/static/img/logo1.jpg'">
+        </div>
+
+        <!-- Detalles del Producto -->
+        <div style="padding: 40px; display: flex; flex-direction: column; gap: 20px;">
+            <div>
+                <p style="color: #777; font-size: 14px; margin-bottom: 5px;">{{ producto.División }} | {{ producto.Genero }}</p>
+                <h1 style="color: #8a8f64; font-size: 36px; line-height: 1.2;">{{ producto.nombre }}</h1>
+                <p style="color: #999;">REF: {{ producto.Referencia }}</p>
+            </div>
+
+            <div style="background: rgba(138,143,100,0.1); padding: 20px; border-radius: 18px;">
+                <p style="font-size: 18px; color: #444; margin-bottom: 10px;">Deporte: <strong>{{ producto.Deporte }}</strong></p>
+                <p style="font-size: 18px; color: #444;">Ciudad/Tienda: <strong>{{ producto.Ciudad }} - {{ producto.Tienda }}</strong></p>
+            </div>
+
+            <!-- Tallas Disponibles -->
+            <div>
+                <h3 style="color: #8a8f64; margin-bottom: 15px;">Tallas Disponibles:</h3>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    {% for t in tallas %}
+                    <div style="border: 2px solid #8a8f64; padding: 10px 20px; border-radius: 14px; text-align: center; min-width: 80px;">
+                        <span style="display: block; font-weight: bold; font-size: 18px; color: #8a8f64;">{{ t.Talla }}</span>
+                        <span style="font-size: 12px; color: #777;">Stock: {{ t.Inventario }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Precios -->
+            <div style="border-top: 1px solid #eee; padding-top: 20px; margin-top: auto;">
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 5px;">
+                    <span style="text-decoration: line-through; color: #999; font-size: 20px;">{{ producto['precio Antes'] }}</span>
+                    <span style="background: #8a8f64; color: white; padding: 5px 12px; border-radius: 999px; font-weight: bold;">{{ producto['%DCTO'] }}</span>
+                </div>
+                <div style="font-size: 48px; font-weight: bold; color: #8a8f64;">
+                    {{ producto['Precio Ahora'] }}
+                </div>
+            </div>
+
+            <button onclick="window.history.back()" style="margin-top: 20px;">Regresar al Catálogo</button>
+        </div>
+    </div>
+</section>
+{% endblock %}
