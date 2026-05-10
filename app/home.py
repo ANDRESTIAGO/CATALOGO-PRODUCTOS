@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Request, Form, HTTPException
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi import APIRouter, Request, Form, HTTPException, Query
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 import pandas as pd
 from pathlib import Path
@@ -12,14 +12,9 @@ DATA_CSV = "data.csv"
 
 def load_data():
     try:
-        # Usar encoding latin-1 o utf-8-sig por si hay caracteres especiales ocultos
         df = pd.read_csv(DATA_CSV, encoding='utf-8')
-        
-        # Normalizar nombres de columnas (quitar espacios y acentos para evitar KeyErrors)
         df.columns = [c.strip() for c in df.columns]
         
-        # Mapear nombres según lo encontrado en el archivo (Division sin acento)
-        # Asegurar que las columnas existan antes de operar
         col_map = {
             'División': 'Division',
             'Género': 'Genero'
@@ -28,7 +23,6 @@ def load_data():
             if actual in df.columns and target not in df.columns:
                 df[target] = df[actual]
 
-        # Llenar nulos
         df['Division'] = df['Division'].fillna('Sin Categoría').astype(str)
         df['Genero'] = df['Genero'].fillna('Unisex').astype(str)
         df['Deporte'] = df['Deporte'].fillna('General').astype(str)
@@ -39,15 +33,22 @@ def load_data():
         return pd.DataFrame()
 
 @router.get("/", response_class=HTMLResponse)
-async def ver_catalogo(request: Request):
+async def ver_catalogo(request: Request, page: int = 1):
     df = load_data()
     if df.empty:
         return templates.TemplateResponse(request, "home.html", {"productos": [], "mensaje": "No hay productos disponibles."})
     
-    # Agrupar por Referencia para la vista principal
-    productos = df.drop_duplicates(subset=['Referencia']).to_dict(orient="records")
+    # Agrupar por Referencia
+    df_unique = df.drop_duplicates(subset=['Referencia'])
     
-    # Obtener filtros únicos usando los nombres reales del CSV
+    # Paginación
+    limit = 12
+    start = (page - 1) * limit
+    end = start + limit
+    productos = df_unique.iloc[start:end].to_dict(orient="records")
+    
+    has_more = len(df_unique) > end
+    
     filtros = {
         "categorias": sorted([str(x) for x in df["Division"].unique()]),
         "generos": sorted([str(x) for x in df["Genero"].unique()]),
@@ -56,7 +57,41 @@ async def ver_catalogo(request: Request):
     
     return templates.TemplateResponse(request, "home.html", {
         "productos": productos,
-        "filtros": filtros
+        "filtros": filtros,
+        "page": page,
+        "has_more": has_more
+    })
+
+@router.get("/api/productos")
+async def api_productos(
+    page: int = 1,
+    q: str = "",
+    categoria: str = "",
+    genero: str = "",
+    deporte: str = ""
+):
+    df = load_data()
+    if q:
+        df = df[df['nombre'].str.contains(q, case=False) | df['Referencia'].astype(str).str.contains(q, case=False)]
+    if categoria:
+        df = df[df['Division'] == categoria]
+    if genero:
+        df = df[df['Genero'] == genero]
+    if deporte:
+        df = df[df['Deporte'] == deporte]
+        
+    df_unique = df.drop_duplicates(subset=['Referencia'])
+    
+    limit = 12
+    start = (page - 1) * limit
+    end = start + limit
+    productos = df_unique.iloc[start:end].to_dict(orient="records")
+    
+    has_more = len(df_unique) > end
+    
+    return JSONResponse({
+        "productos": productos,
+        "has_more": has_more
     })
 
 @router.get("/buscar", response_class=HTMLResponse)
@@ -65,7 +100,8 @@ async def buscar_productos(
     q: str = "", 
     categoria: str = "", 
     genero: str = "", 
-    deporte: str = ""
+    deporte: str = "",
+    page: int = 1
 ):
     df_all = load_data()
     df = df_all.copy()
@@ -79,7 +115,14 @@ async def buscar_productos(
     if deporte:
         df = df[df['Deporte'] == deporte]
         
-    productos = df.drop_duplicates(subset=['Referencia']).to_dict(orient="records")
+    df_unique = df.drop_duplicates(subset=['Referencia'])
+    
+    limit = 12
+    start = (page - 1) * limit
+    end = start + limit
+    productos = df_unique.iloc[start:end].to_dict(orient="records")
+    
+    has_more = len(df_unique) > end
     
     filtros = {
         "categorias": sorted([str(x) for x in df_all["Division"].unique()]),
@@ -93,13 +136,14 @@ async def buscar_productos(
         "query": q,
         "sel_cat": categoria,
         "sel_gen": genero,
-        "sel_dep": deporte
+        "sel_dep": deporte,
+        "page": page,
+        "has_more": has_more
     })
 
 @router.get("/producto/{referencia}", response_class=HTMLResponse)
 async def detalle_producto(request: Request, referencia: str):
     df = load_data()
-    # Asegurar que Referencia sea tratada como string para la comparación
     variantes = df[df['Referencia'].astype(str) == str(referencia)]
     if variantes.empty:
         raise HTTPException(status_code=404, detail="Producto no encontrado")

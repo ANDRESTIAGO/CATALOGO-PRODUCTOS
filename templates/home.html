@@ -46,7 +46,7 @@
     {% endif %}
 
     <!-- Cuadrícula de Productos -->
-    <div class="products-grid">
+    <div class="products-grid" id="products-container">
         {% for producto in productos %}
         <div class="product-card">
             <div class="product-image-wrapper" onclick="window.location.href='/producto/{{ producto.Referencia }}'">
@@ -66,6 +66,11 @@
         {% endfor %}
     </div>
 
+    <!-- Botón Cargar Más -->
+    <div id="load-more-container" style="text-align: center; margin-top: 50px; display: {% if has_more %}block{% else %}none{% endif %};">
+        <button id="load-more-btn" style="width: auto; padding: 15px 50px;">Cargar más productos</button>
+    </div>
+
     {% if not productos and not mensaje %}
         <div style="text-align: center; padding: 50px;">
             <h3>No se encontraron productos que coincidan con la búsqueda.</h3>
@@ -73,4 +78,59 @@
         </div>
     {% endif %}
 </section>
+
+<script>
+    let currentPage = {{ page }};
+    const productsContainer = document.getElementById('products-container');
+    const loadMoreBtn = document.getElementById('load-more-btn');
+    const loadMoreContainer = document.getElementById('load-more-container');
+
+    loadMoreBtn.addEventListener('click', async () => {
+        currentPage++;
+        loadMoreBtn.innerText = 'Cargando...';
+        loadMoreBtn.disabled = true;
+
+        const params = new URLSearchParams(window.location.search);
+        params.set('page', currentPage);
+
+        try {
+            const response = await fetch(`/api/productos?${params.toString()}`);
+            const data = await response.json();
+
+            if (data.productos.length > 0) {
+                data.productos.forEach(producto => {
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    card.innerHTML = `
+                        <div class="product-image-wrapper" onclick="window.location.href='/producto/${producto.Referencia}'">
+                            <img src="${producto.Imagen}" alt="${producto.nombre}" class="product-image" onerror="this.src='/static/img/logo1.jpg'">
+                            <div class="product-overlay"></div>
+                            <div class="product-info">
+                                <p class="product-ref">REF: ${producto.Referencia}</p>
+                                <h3 class="product-name">${producto.nombre}</h3>
+                                <div class="price-row">
+                                    <span class="old-price">${producto['precio Antes']}</span>
+                                    <span class="discount-badge">${producto['%DCTO']}</span>
+                                </div>
+                                <div class="current-price">${producto['Precio Ahora']}</div>
+                            </div>
+                        </div>
+                    `;
+                    productsContainer.appendChild(card);
+                });
+            }
+
+            if (!data.has_more) {
+                loadMoreContainer.style.display = 'none';
+            } else {
+                loadMoreBtn.innerText = 'Cargar más productos';
+                loadMoreBtn.disabled = false;
+            }
+        } catch (error) {
+            console.error('Error cargando más productos:', error);
+            loadMoreBtn.innerText = 'Error al cargar. Reintentar';
+            loadMoreBtn.disabled = false;
+        }
+    });
+</script>
 {% endblock %}
