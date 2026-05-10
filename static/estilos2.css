@@ -249,6 +249,12 @@ button:hover {
 
 .product-info {
   padding: 20px;
+
+}
+
+.descuento {
+  background: #8a8f64; color: white;padding: 5px 12px; border-radius: 999px; font-weight: bold;
+
 }
 
 /* FORMS (Login/Registro/Modificar) */

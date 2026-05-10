@@ -23,9 +23,12 @@ def load_data():
             if actual in df.columns and target not in df.columns:
                 df[target] = df[actual]
 
+        # Normalización y limpieza de nulos
         df['Division'] = df['Division'].fillna('Sin Categoría').astype(str)
         df['Genero'] = df['Genero'].fillna('Unisex').astype(str)
         df['Deporte'] = df['Deporte'].fillna('General').astype(str)
+        df['Edad'] = df['Edad'].fillna('Todas').astype(str)
+        df['Talla'] = df['Talla'].fillna('N/A').astype(str)
         df['nombre'] = df['nombre'].fillna('Sin Nombre').astype(str)
         
         return df
@@ -39,7 +42,7 @@ async def ver_catalogo(request: Request, page: int = 1):
     if df.empty:
         return templates.TemplateResponse(request, "home.html", {"productos": [], "mensaje": "No hay productos disponibles."})
     
-    # Agrupar por Referencia
+    # Agrupar por Referencia para la vista principal
     df_unique = df.drop_duplicates(subset=['Referencia'])
     
     # Paginación
@@ -53,7 +56,9 @@ async def ver_catalogo(request: Request, page: int = 1):
     filtros = {
         "categorias": sorted([str(x) for x in df["Division"].unique()]),
         "generos": sorted([str(x) for x in df["Genero"].unique()]),
-        "deportes": sorted([str(x) for x in df["Deporte"].unique()])
+        "deportes": sorted([str(x) for x in df["Deporte"].unique()]),
+        "edades": sorted([str(x) for x in df["Edad"].unique()]),
+        "tallas": sorted([str(x) for x in df["Talla"].unique()])
     }
     
     return templates.TemplateResponse(request, "home.html", {
@@ -69,17 +74,27 @@ async def api_productos(
     q: str = "",
     categoria: str = "",
     genero: str = "",
-    deporte: str = ""
+    deporte: str = "",
+    edad: str = "",
+    talla: str = ""
 ):
     df = load_data()
     if q:
-        df = df[df['nombre'].str.contains(q, case=False) | df['Referencia'].astype(str).str.contains(q, case=False)]
+        df = df[
+            df['nombre'].str.contains(q, case=False) | 
+            df['Referencia'].astype(str).str.contains(q, case=False) |
+            df['Talla'].astype(str).str.contains(q, case=False)
+        ]
     if categoria:
         df = df[df['Division'] == categoria]
     if genero:
         df = df[df['Genero'] == genero]
     if deporte:
         df = df[df['Deporte'] == deporte]
+    if edad:
+        df = df[df['Edad'] == edad]
+    if talla:
+        df = df[df['Talla'] == talla]
         
     df_unique = df.drop_duplicates(subset=['Referencia'])
     
@@ -102,6 +117,8 @@ async def buscar_productos(
     categoria: str = "", 
     genero: str = "", 
     deporte: str = "",
+    edad: str = "",
+    talla: str = "",
     page: int = 1
 ):
     templates = request.app.state.templates
@@ -109,13 +126,21 @@ async def buscar_productos(
     df = df_all.copy()
     
     if q:
-        df = df[df['nombre'].str.contains(q, case=False) | df['Referencia'].astype(str).str.contains(q, case=False)]
+        df = df[
+            df['nombre'].str.contains(q, case=False) | 
+            df['Referencia'].astype(str).str.contains(q, case=False) |
+            df['Talla'].astype(str).str.contains(q, case=False)
+        ]
     if categoria:
         df = df[df['Division'] == categoria]
     if genero:
         df = df[df['Genero'] == genero]
     if deporte:
         df = df[df['Deporte'] == deporte]
+    if edad:
+        df = df[df['Edad'] == edad]
+    if talla:
+        df = df[df['Talla'] == talla]
         
     df_unique = df.drop_duplicates(subset=['Referencia'])
     
@@ -129,7 +154,9 @@ async def buscar_productos(
     filtros = {
         "categorias": sorted([str(x) for x in df_all["Division"].unique()]),
         "generos": sorted([str(x) for x in df_all["Genero"].unique()]),
-        "deportes": sorted([str(x) for x in df_all["Deporte"].unique()])
+        "deportes": sorted([str(x) for x in df_all["Deporte"].unique()]),
+        "edades": sorted([str(x) for x in df_all["Edad"].unique()]),
+        "tallas": sorted([str(x) for x in df_all["Talla"].unique()])
     }
     
     return templates.TemplateResponse(request, "home.html", {
@@ -139,6 +166,8 @@ async def buscar_productos(
         "sel_cat": categoria,
         "sel_gen": genero,
         "sel_dep": deporte,
+        "sel_edad": edad,
+        "sel_talla": talla,
         "page": page,
         "has_more": has_more
     })
