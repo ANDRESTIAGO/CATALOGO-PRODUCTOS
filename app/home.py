@@ -79,8 +79,7 @@ async def api_productos(
     if q:
         df = df[
             df['nombre'].str.contains(q, case=False) | 
-            df['Referencia'].astype(str).str.contains(q, case=False) |
-            df['Talla'].astype(str).str.contains(q, case=False)
+            df['Referencia'].astype(str).str.contains(q, case=False)
         ]
     if categoria:
         df = df[df['Division'] == categoria]
@@ -124,8 +123,7 @@ async def buscar_productos(
     if q:
         df = df[
             df['nombre'].str.contains(q, case=False) | 
-            df['Referencia'].astype(str).str.contains(q, case=False) |
-            df['Talla'].astype(str).str.contains(q, case=False)
+            df['Referencia'].astype(str).str.contains(q, case=False)
         ]
     if categoria:
         df = df[df['Division'] == categoria]
@@ -192,20 +190,14 @@ async def api_sugerencias(q: str = ""):
     
     df = load_data()
     
-    # Buscar en múltiples campos
+    # Buscar solo en nombre y Referencia para ser consistente con la búsqueda
     nombres = df[df['nombre'].str.contains(q, case=False)]['nombre'].unique().tolist()
     referencias = df[df['Referencia'].astype(str).str.contains(q, case=False)]['Referencia'].unique().tolist()
-    tallas = df[df['Talla'].astype(str).str.contains(q, case=False)]['Talla'].unique().tolist()
-    divisiones = df[df['Division'].str.contains(q, case=False)]['Division'].unique().tolist()
-    deportes = df[df['Deporte'].str.contains(q, case=False)]['Deporte'].unique().tolist()
     
-    # Combinar todas las sugerencias, eliminar duplicados y limitar resultados
+    # Combinar sugerencias, eliminar duplicados y limitar resultados
     sugerencias = list(set(
         nombres + 
-        [str(r) for r in referencias] + 
-        [str(t) for t in tallas] + 
-        divisiones + 
-        deportes
+        [str(r) for r in referencias]
     ))[:10]
     
     return JSONResponse(sugerencias)

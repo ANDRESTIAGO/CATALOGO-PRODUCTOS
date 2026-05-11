@@ -5,7 +5,8 @@
 {% block sidebar %}
     <div class="filters-container">
         <form action="/buscar" method="get" id="filter-form" style="display: contents;">
-            <!-- Removido el input oculto 'q' para que los filtros sean independientes de la búsqueda -->
+            <!-- Mantener la búsqueda actual al filtrar -->
+            <input type="hidden" name="q" value="{{ query or '' }}">
             
             <label style="font-weight: bold; margin-bottom: 5px;">Categoría</label>
             <select name="categoria" class="filter-select">
@@ -64,6 +65,13 @@
     <!-- Buscador -->
     <div class="search-container">
         <form action="/buscar" method="get" id="search-form" style="display: flex; gap: 10px; position: relative;">
+            <!-- Mantener los filtros actuales al buscar -->
+            <input type="hidden" name="categoria" value="{{ sel_cat or '' }}">
+            <input type="hidden" name="genero" value="{{ sel_gen or '' }}">
+            <input type="hidden" name="deporte" value="{{ sel_dep or '' }}">
+            <input type="hidden" name="edad" value="{{ sel_edad or '' }}">
+            <input type="hidden" name="talla" value="{{ sel_talla or '' }}">
+
             <input type="text" name="q" id="search-input" placeholder="Buscar por nombre o referencia..." class="search-input" value="{{ query or '' }}" list="search-suggestions" autocomplete="off">
             <datalist id="search-suggestions"></datalist>
             <button type="submit" style="width: auto; padding: 0 30px;">Buscar</button>
@@ -71,17 +79,12 @@
     </div>
 
     <script>
-        // Si el usuario usa el buscador, desactivar los filtros laterales
+        // Cerrar sidebar al enviar formularios para mejor experiencia de usuario
         document.getElementById('search-form').addEventListener('submit', () => {
             sessionStorage.setItem('sidebarOpen', 'false');
-            // No enviamos los parámetros de filtros en el buscador
         });
 
-        // Si el usuario usa los filtros laterales, limpiar el buscador
         document.getElementById('filter-form').addEventListener('submit', () => {
-            const searchInput = document.getElementById('search-input');
-            if (searchInput) searchInput.value = '';
-            // Cerrar la barra lateral automáticamente al aplicar filtros
             sessionStorage.setItem('sidebarOpen', 'false');
         });
     </script>
