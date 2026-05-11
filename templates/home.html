@@ -7,11 +7,39 @@
     <br><br>
     <!-- Buscador y Filtros -->
     <div class="search-container">
-        <form action="/buscar" method="get" style="display: flex; gap: 10px;">
-            <input type="text" name="q" placeholder="Buscar por nombre o referencia..." class="search-input" value="{{ query or '' }}">
+        <form action="/buscar" method="get" style="display: flex; gap: 10px; position: relative;">
+            <input type="text" name="q" id="search-input" placeholder="Buscar por nombre o referencia..." class="search-input" value="{{ query or '' }}" list="search-suggestions" autocomplete="off">
+            <datalist id="search-suggestions"></datalist>
             <button type="submit" style="width: auto; padding: 0 30px;">Buscar</button>
         </form>
     </div>
+
+    <script>
+        const searchInput = document.getElementById('search-input');
+        const suggestionsList = document.getElementById('search-suggestions');
+
+        searchInput.addEventListener('input', async () => {
+            const query = searchInput.value;
+            if (query.length < 2) {
+                suggestionsList.innerHTML = '';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/sugerencias?q=${encodeURIComponent(query)}`);
+                const sugerencias = await response.json();
+                
+                suggestionsList.innerHTML = '';
+                sugerencias.forEach(sug => {
+                    const option = document.createElement('option');
+                    option.value = sug;
+                    suggestionsList.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error fetching suggestions:', error);
+            }
+        });
+    </script>
 
     <div class="filters-container">
         <form action="/buscar" method="get" id="filter-form" style="display: contents;">
@@ -69,14 +97,14 @@
         {% for producto in productos %}
         <div class="product-card">
             <div class="product-image-wrapper" onclick="window.location.href='/producto/{{ producto.Referencia }}'">
-                <img src="{{ producto.Imagen }}" alt="{{ producto.nombre }}" class="product-image" onerror="this.src='/static/img/logo1.jpg'">
+                <img src="{{ producto.Imagen }}" alt="{{ producto.nombre }}" class="product-image" onerror="this.src='/static/img/ESCUDO.jpeg'">
                 <div class="product-overlay"></div>
                 <div class="product-info">
                     <p class="product-ref">REF: {{ producto.Referencia }}</p>
                     <h3 class="product-name">{{ producto.nombre }}</h3>
                     <BR></BR>
                     <div class="price-row" style="position: relative;">
-                        <span class="old-price">Antes: {{ producto['precio Antes'] | currency }}</span>
+                        <span class="old-price">Antes: {{ producto['precio antes'] | currency }}</span>
                         <span style="background: #8a8f64; color: white; padding: 5px 12px; border-radius: 999px; font-weight: bold; position: absolute; right: 0; bottom: 0;" class="discount-badge">Dcto: {{ producto['%DCTO'] }}</span>
                     </div>
                     <div class="current-price">Ahora: {{ producto['Precio Ahora'] | currency }}</div>
@@ -131,7 +159,7 @@
                     card.className = 'product-card';
                     card.innerHTML = `
                         <div class="product-image-wrapper" onclick="window.location.href='/producto/${producto.Referencia}'">
-                            <img src="${producto.Imagen}" alt="${producto.nombre}" class="product-image" onerror="this.src='/static/img/logo1.jpg'">
+                            <img src="${producto.Imagen}" alt="${producto.nombre}" class="product-image" onerror="this.src='/static/img/ESCUDO.jpeg'">
                             <div class="product-overlay"></div>
                             <div class="product-info">
                                 <p class="product-ref">REF: ${producto.Referencia}</p>

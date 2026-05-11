@@ -10,11 +10,15 @@ def load_data():
         df = pd.read_csv(DATA_CSV, encoding='utf-8')
         df.columns = [c.strip() for c in df.columns]
         
-        # Mapeo de nombres si es necesario
-        if 'Division' not in df.columns and 'División' in df.columns:
-            df['Division'] = df['División']
-        if 'Genero' not in df.columns and 'Género' in df.columns:
-            df['Genero'] = df['Género']
+        # Asegurar que Inventario sea numérico
+        if 'Inventario' in df.columns:
+            df['Inventario'] = pd.to_numeric(df['Inventario'], errors='coerce').fillna(0).astype(int)
+
+        # Mapeo de nombres si es necesario (para que coincidan con los templates)
+        if 'Division' in df.columns:
+            df['División'] = df['Division']
+        if 'Genero' in df.columns:
+            df['Género'] = df['Genero']
 
         # Limpieza de nulos
         df['Division'] = df['Division'].fillna('Sin Categoría').astype(str)
@@ -170,9 +174,26 @@ async def detalle_producto(request: Request, referencia: str):
         raise HTTPException(status_code=404, detail="Producto no encontrado")
     
     producto = variantes.iloc[0].to_dict()
-    tallas = variantes[['Talla', 'Inventario']].to_dict(orient="records")
+    
+    # Unificar cantidad disponible por talla sumando el inventario de todas las tiendas
+    tallas_agrupadas = variantes.groupby('Talla', sort=False)['Inventario'].sum().reset_index()
+    tallas = tallas_agrupadas.to_dict(orient="records")
     
     return templates.TemplateResponse(request, "info.html", {
         "producto": producto,
         "tallas": tallas
     })
+
+@router.get("/api/sugerencias")
+async def api_sugerencias(q: str = ""):
+    if not q or len(q) < 2:
+        return JSONResponse([])
+    
+    df = load_data()
+    # Buscar en nombres y referencias
+    nombres = df[df['nombre'].str.contains(q, case=False)]['nombre'].unique().tolist()
+    referencias = df[df['Referencia'].astype(str).str.contains(q, case=False)]['Referencia'].unique().tolist()
+    
+    # Combinar y limitar resultados
+    sugerencias = list(set(nombres + [str(r) for r in referencias]))[:10]
+    return JSONResponse(sugerencias)
