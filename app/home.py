@@ -32,6 +32,15 @@ def load_data():
     except FileNotFoundError:
         return pd.DataFrame()
 
+def get_filtros_completos(df):
+    return {
+        "categorias": sorted([str(x) for x in df["Division"].unique()]),
+        "generos": sorted([str(x) for x in df["Genero"].unique()]),
+        "deportes": sorted([str(x) for x in df["Deporte"].unique()]),
+        "edades": sorted([str(x) for x in df["Edad"].unique()]),
+        "tallas": sorted([str(x) for x in df["Talla"].unique()])
+    }
+
 @router.get("/", response_class=HTMLResponse)
 async def ver_catalogo(request: Request, page: int = 1):
     templates = request.app.state.templates
@@ -47,14 +56,7 @@ async def ver_catalogo(request: Request, page: int = 1):
     productos = df_unique.iloc[start:end].to_dict(orient="records")
     
     has_more = len(df_unique) > end
-    
-    filtros = {
-        "categorias": sorted([str(x) for x in df["Division"].unique()]),
-        "generos": sorted([str(x) for x in df["Genero"].unique()]),
-        "deportes": sorted([str(x) for x in df["Deporte"].unique()]),
-        "edades": sorted([str(x) for x in df["Edad"].unique()]),
-        "tallas": sorted([str(x) for x in df["Talla"].unique()])
-    }
+    filtros = get_filtros_completos(df)
     
     return templates.TemplateResponse(request, "home.html", {
         "productos": productos,
@@ -145,16 +147,7 @@ async def buscar_productos(
     has_more = len(df_unique) > end
     
     # Calcular opciones de filtros siempre sobre el total de datos (Independientes)
-    def get_filtros_independientes(df_f):
-        return {
-            "categorias": sorted([str(x) for x in df_f["Division"].unique()]),
-            "generos": sorted([str(x) for x in df_f["Genero"].unique()]),
-            "deportes": sorted([str(x) for x in df_f["Deporte"].unique()]),
-            "edades": sorted([str(x) for x in df_f["Edad"].unique()]),
-            "tallas": sorted([str(x) for x in df_f["Talla"].unique()])
-        }
-
-    filtros = get_filtros_independientes(df_all)
+    filtros = get_filtros_completos(df_all)
     
     return templates.TemplateResponse(request, "home.html", {
         "productos": productos, 
@@ -183,9 +176,13 @@ async def detalle_producto(request: Request, referencia: str):
     tallas_agrupadas = variantes.groupby('Talla', sort=False)['Inventario'].sum().reset_index()
     tallas = tallas_agrupadas.to_dict(orient="records")
     
+    # Calcular opciones de filtros siempre sobre el total de datos (Independientes)
+    filtros = get_filtros_completos(df)
+    
     return templates.TemplateResponse(request, "info.html", {
         "producto": producto,
-        "tallas": tallas
+        "tallas": tallas,
+        "filtros": filtros
     })
 
 @router.get("/api/sugerencias")

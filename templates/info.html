@@ -2,6 +2,68 @@
 
 {% block title %} {{ producto.nombre }} - Detalle {% endblock %}
 
+{% block sidebar %}
+    <div class="filters-container">
+        <form action="/buscar" method="get" id="filter-form" style="display: contents;">
+            <!-- Removido el input oculto 'q' para que los filtros sean independientes de la búsqueda -->
+            
+            <label style="font-weight: bold; margin-bottom: 5px;">Categoría</label>
+            <select name="categoria" class="filter-select">
+                <option value="">Todas las Categorías</option>
+                {% for cat in filtros.categorias %}
+                    <option value="{{ cat }}">{{ cat }}</option>
+                {% endfor %}
+            </select>
+
+            <label style="font-weight: bold; margin-bottom: 5px;">Género</label>
+            <select name="genero" class="filter-select">
+                <option value="">Todos los Géneros</option>
+                {% for gen in filtros.generos %}
+                    <option value="{{ gen }}">{{ gen }}</option>
+                {% endfor %}
+            </select>
+
+            <label style="font-weight: bold; margin-bottom: 5px;">Deporte</label>
+            <select name="deporte" class="filter-select">
+                <option value="">Todos los Deportes</option>
+                {% for dep in filtros.deportes %}
+                    <option value="{{ dep }}">{{ dep }}</option>
+                {% endfor %}
+            </select>
+
+            <label style="font-weight: bold; margin-bottom: 5px;">Edad</label>
+            <select name="edad" class="filter-select">
+                <option value="">Todas las Edades</option>
+                {% for ed in filtros.edades %}
+                    <option value="{{ ed }}">{{ ed }}</option>
+                {% endfor %}
+            </select>
+
+            <label style="font-weight: bold; margin-bottom: 5px;">Talla</label>
+            <select name="talla" class="filter-select">
+                <option value="">Todas las Tallas</option>
+                {% for t in filtros.tallas %}
+                    <option value="{{ t }}">{{ t }}</option>
+                {% endfor %}
+            </select>
+
+            <br>
+            <button type="submit" class="btn" style="margin-bottom: 10px;">Aplicar Filtros</button>
+            
+            <a href="/" class="filter-select" onclick="sessionStorage.setItem('sidebarOpen', 'false')" style="text-align: center; text-decoration: none; background: #eee; color: #444; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 1px solid #ccc; height: 45px;">
+                Limpiar Filtros
+            </a>
+
+        </form>
+    </div>
+    <script>
+        // Si el usuario usa los filtros laterales, cerrar la barra automáticamente
+        document.getElementById('filter-form').addEventListener('submit', () => {
+            sessionStorage.setItem('sidebarOpen', 'false');
+        });
+    </script>
+{% endblock %}
+
 {% block content %}
 <section class="contenedor" style="padding-top: 50px;">
     <div class="product-detail-grid">
