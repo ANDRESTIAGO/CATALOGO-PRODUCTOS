@@ -3,8 +3,9 @@
 {% block title %} Iniciar Sesión - FastComponents {% endblock %}
 
 {% block content %}
-<div class="contenedor" style="display: flex; justify-content: center; align-items: center; min-height: 80vh;">
-    <div class="carta" style="max-width: 400px; width: 100%; padding: 40px;">
+<div style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('{{ url_for('static', path='img/fondo.jpeg') }}'); background-size: cover; background-position: center; background-attachment: fixed; min-height: 100vh; width: 100%; display: flex; flex-direction: column;">
+    <div class="contenedor" style="display: flex; justify-content: center; align-items: center; flex: 1;">
+        <div class="carta" style="max-width: 400px; width: 100%; padding: 40px; background: white; border-radius: 24px;">
         <h2 style="margin-bottom: 20px;">Iniciar Sesión</h2>
         
         {% if error %}
@@ -27,6 +28,7 @@
             <button type="submit">Entrar</button>
         </form>
     </div>
+</div>
 </div>
 {% endblock %}
 
