@@ -8,6 +8,102 @@ from app import home
 router = APIRouter()
 
 
+def _to_int(valor):
+    """Convierte cualquier representación de precio/dcto a int (acepta '$89.950', '20%', '0.20', etc.)."""
+    if valor is None:
+        return 0
+    s = str(valor).strip()
+    if not s:
+        return 0
+    s = s.replace("$", "").replace("%", "").replace(".", "").replace(",", "").strip()
+    if not s:
+        return 0
+    try:
+        return int(float(s))
+    except Exception:
+        return 0
+
+
+def _dcto_promocional(num_items: int) -> int:
+    """Devuelve el % de descuento promocional según la cantidad total de items en el carrito."""
+    if num_items >= 4:
+        return 40
+    if num_items == 3:
+        return 30
+    if num_items == 2:
+        return 20
+    return 0
+
+
+def calcular_carrito(items):
+    """
+    Aplica la lógica de promociones por cantidad sobre los items del carrito.
+
+    Reglas:
+      - 2 items en total → 20% mínimo por item
+      - 3 items en total → 30% mínimo por item
+      - 4+ items en total → 40% mínimo por item
+      - Si el item ya tiene un %DCTO original mayor, se respeta el más alto.
+
+    Devuelve un dict con:
+      items: lista enriquecida (precio_antes_int, dcto_original_int, dcto_aplicado, precio_final, ahorro)
+      subtotal: suma de precios "antes" (precio sin ningún descuento)
+      total: suma de precios finales (con descuentos aplicados)
+      ahorro: subtotal - total
+      dcto_promocional: % promocional vigente por cantidad
+      cantidad: número total de items
+    """
+    cantidad = len(items)
+    dcto_promo = _dcto_promocional(cantidad)
+
+    subtotal = 0
+    total = 0
+    items_calc = []
+
+    for it in items:
+        precio_antes = _to_int(it.get("precio_antes") or it.get("precio"))
+        precio_ahora = _to_int(it.get("precio"))
+        dcto_original = _to_int(it.get("dcto_original"))
+
+        # Si no hay precio "antes" (item viejo o sin dcto original), tomamos el precio "ahora" como base
+        if precio_antes <= 0:
+            precio_antes = precio_ahora
+
+        # El descuento aplicado es el MAYOR entre el original y el promocional
+        dcto_aplicado = max(dcto_original, dcto_promo)
+
+        # Precio final: precio_antes * (1 - dcto/100), redondeado a entero
+        if dcto_aplicado > 0:
+            precio_final = int(round(precio_antes * (100 - dcto_aplicado) / 100))
+        else:
+            precio_final = precio_antes
+
+        ahorro_item = precio_antes - precio_final
+        subtotal += precio_antes
+        total += precio_final
+
+        enriched = dict(it)
+        enriched.update({
+            "precio_antes_int": precio_antes,
+            "precio_ahora_int": precio_ahora,
+            "dcto_original_int": dcto_original,
+            "dcto_aplicado": dcto_aplicado,
+            "dcto_es_promocional": dcto_aplicado == dcto_promo and dcto_promo > dcto_original,
+            "precio_final": precio_final,
+            "ahorro_item": ahorro_item,
+        })
+        items_calc.append(enriched)
+
+    return {
+        "items": items_calc,
+        "cantidad": cantidad,
+        "dcto_promocional": dcto_promo,
+        "subtotal": subtotal,
+        "total": total,
+        "ahorro": subtotal - total,
+    }
+
+
 def _stock_disponible_ciudad(df, referencia, talla, ciudad) -> int:
     """Inventario disponible para (Referencia, Talla, Ciudad), sumando todas las tiendas."""
     if df is None or df.empty:
@@ -92,6 +188,8 @@ async def agregar_al_carrito(
 
     nombre = producto_row.iloc[0].get("nombre", "")
     precio = producto_row.iloc[0].get("Precio Ahora", "")
+    precio_antes = producto_row.iloc[0].get("precio Antes", "")
+    dcto_original = producto_row.iloc[0].get("%DCTO", "")
     imagen = producto_row.iloc[0].get("Imagen", "")
 
     item_id = db.agregar_item_carrito(
@@ -102,6 +200,8 @@ async def agregar_al_carrito(
         nombre=nombre,
         precio=precio,
         imagen=imagen,
+        precio_antes=precio_antes,
+        dcto_original=dcto_original,
     )
 
     total_items = db.contar_items(usuario)
@@ -124,18 +224,15 @@ async def ver_carrito(request: Request):
         return RedirectResponse(url="/login")
 
     items = db.obtener_carrito(usuario)
-
-    total = 0
-    for it in items:
-        try:
-            total += int(float(str(it.get("precio", "0")).replace("$", "").replace(".", "").replace(",", "").strip() or 0))
-        except Exception:
-            pass
+    resumen = calcular_carrito(items)
 
     return templates.TemplateResponse(request, "carrito.html", {
-        "items": items,
-        "total": total,
-        "cantidad": len(items),
+        "items": resumen["items"],
+        "cantidad": resumen["cantidad"],
+        "subtotal": resumen["subtotal"],
+        "total": resumen["total"],
+        "ahorro": resumen["ahorro"],
+        "dcto_promocional": resumen["dcto_promocional"],
     })
 
 

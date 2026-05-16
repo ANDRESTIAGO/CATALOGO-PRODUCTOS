@@ -1,1 +1,1 @@
-id;usuario;referencia;talla;ciudad;nombre;precio;imagen;cantidad;fecha_agregado
+id;usuario;referencia;talla;ciudad;nombre;precio;precio_antes;dcto_original;imagen;cantidad;fecha_agregado

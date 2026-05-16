@@ -23,7 +23,9 @@ CARRITO_COLUMNS = [
     "talla",
     "ciudad",
     "nombre",
-    "precio",
+    "precio",          # Precio "ahora" del catálogo (con dcto original ya aplicado)
+    "precio_antes",    # Precio antes del descuento original (precio Antes del catálogo)
+    "dcto_original",   # %DCTO del catálogo al momento de añadirse
     "imagen",
     "cantidad",
     "fecha_agregado",
@@ -34,11 +36,30 @@ _lock = Lock()
 
 
 def init_storage():
-    """Crea el archivo carrito.csv si no existe."""
+    """
+    Crea el archivo carrito.csv si no existe, o lo migra agregando columnas
+    faltantes sin perder los datos existentes.
+    """
     if not os.path.exists(CARRITO_CSV):
         with open(CARRITO_CSV, "w", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=CARRITO_COLUMNS, delimiter=";")
             writer.writeheader()
+        return
+
+    # Migración: si faltan columnas nuevas, las agregamos vacías y reescribimos.
+    try:
+        df = pd.read_csv(CARRITO_CSV, sep=";", encoding="utf-8", dtype=str).fillna("")
+    except Exception:
+        df = pd.DataFrame(columns=CARRITO_COLUMNS)
+
+    cambios = False
+    for col in CARRITO_COLUMNS:
+        if col not in df.columns:
+            df[col] = ""
+            cambios = True
+    if cambios:
+        df = df[CARRITO_COLUMNS]
+        df.to_csv(CARRITO_CSV, sep=";", encoding="utf-8", index=False)
 
 
 def _leer_carrito_df():
@@ -113,7 +134,8 @@ def reponer_inventario(referencia: str, talla: str, ciudad: str, cantidad: int =
 
 # ----------------------- CARRITO -----------------------
 
-def agregar_item_carrito(usuario, referencia, talla, ciudad, nombre, precio, imagen):
+def agregar_item_carrito(usuario, referencia, talla, ciudad, nombre, precio, imagen,
+                          precio_antes="", dcto_original=""):
     """Agrega una unidad al carrito del usuario."""
     with _lock:
         df = _leer_carrito_df()
@@ -126,6 +148,8 @@ def agregar_item_carrito(usuario, referencia, talla, ciudad, nombre, precio, ima
             "ciudad": str(ciudad),
             "nombre": str(nombre),
             "precio": str(precio),
+            "precio_antes": str(precio_antes) if precio_antes is not None else "",
+            "dcto_original": str(dcto_original) if dcto_original is not None else "",
             "imagen": str(imagen),
             "cantidad": "1",
             "fecha_agregado": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),

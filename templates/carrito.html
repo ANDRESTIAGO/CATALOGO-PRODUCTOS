@@ -4,20 +4,56 @@
 
 {% block sidebar %}
 <p>Aquí puedes ver los artículos que has agregado a tu carrito de compras.</p>
+<div style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 12px;">
+    <h4 style="color: #8a8f64; margin-bottom: 10px;">Promociones por cantidad</h4>
+    <ul style="font-size: 13px; color: #555; padding-left: 18px; line-height: 1.7;">
+        <li>2 artículos → <strong>20%</strong> dcto</li>
+        <li>3 artículos → <strong>30%</strong> dcto</li>
+        <li>4+ artículos → <strong>40%</strong> dcto</li>
+    </ul>
+    <p style="font-size: 12px; color: #888; margin-top: 8px;">
+        Si un artículo ya tiene descuento, se aplica el más alto.
+    </p>
+</div>
 {% endblock %}
 
 {% block content %}
 <section class="contenedor" style="padding-top: 40px; padding-bottom: 60px;">
     <div style="max-width: 1000px; margin: 0 auto; background: white; padding: 30px; border-radius: 24px;">
         <h1 style="color: #8a8f64; margin-bottom: 5px;">🛒 Mi Carrito</h1>
-        <p style="color: #777; margin-bottom: 25px;">
+        <p style="color: #777; margin-bottom: 10px;">
             {{ cantidad }} artículo{{ 's' if cantidad != 1 else '' }} en tu carrito.
         </p>
+
+        {% if dcto_promocional > 0 %}
+        <div style="background: linear-gradient(90deg, #8a8f64, #6e7350); color: white;
+                    padding: 15px 20px; border-radius: 16px; margin-bottom: 20px;
+                    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <strong style="font-size: 18px;">🎉 ¡Promoción activa: {{ dcto_promocional }}% dto!</strong>
+                <div style="font-size: 13px; opacity: 0.9; margin-top: 3px;">
+                    Aplicada por llevar {{ cantidad }} artículos (se respeta el descuento más alto por producto).
+                </div>
+            </div>
+            {% if cantidad < 4 %}
+            <div style="font-size: 13px; background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 999px;">
+                {% if cantidad == 2 %}+1 artículo → 30%{% elif cantidad == 3 %}+1 artículo → 40%{% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% elif cantidad == 1 %}
+        <div style="background: #fff8e1; color: #8a6d00; padding: 12px 20px; border-radius: 16px;
+                    margin-bottom: 20px; font-size: 14px;">
+            💡 Agrega otro artículo y obtén <strong>20% de descuento</strong> en tu compra.
+        </div>
+        {% endif %}
 
         {% if items %}
             <div id="carrito-items" style="display: flex; flex-direction: column; gap: 15px;">
                 {% for item in items %}
                 <div class="carrito-item" id="item-{{ item.id }}"
+                     data-precio-antes="{{ item.precio_antes_int }}"
+                     data-dcto-original="{{ item.dcto_original_int }}"
                      style="display: grid; grid-template-columns: 100px 1fr auto; gap: 20px; align-items: center;
                             padding: 15px; border: 1px solid #eee; border-radius: 16px; background: #fafafa;">
                     <img src="{{ item.imagen }}" alt="{{ item.nombre }}"
@@ -27,10 +63,34 @@
                     <div>
                         <h3 style="color: #333; margin-bottom: 5px;">{{ item.nombre }}</h3>
                         <p style="color: #999; font-size: 13px; margin: 0;">REF: {{ item.referencia }}</p>
-                        <p style="color: #555; font-size: 14px; margin: 5px 0;">Talla: <strong>{{ item.talla }}</strong> · Ciudad: {{ item.ciudad }}</p>
-                        <p style="color: #8a8f64; font-weight: bold; font-size: 18px; margin: 5px 0;">
-                            {{ item.precio | currency }}
+                        <p style="color: #555; font-size: 14px; margin: 5px 0;">
+                            Talla: <strong>{{ item.talla }}</strong> · Ciudad: {{ item.ciudad }}
                         </p>
+
+                        <div style="margin: 8px 0;">
+                            {% if item.dcto_aplicado > 0 %}
+                                <span style="text-decoration: line-through; color: #999; font-size: 14px;">
+                                    {{ item.precio_antes_int | currency }}
+                                </span>
+                                <span style="background: {% if item.dcto_es_promocional %}#8a8f64{% else %}#c62828{% endif %};
+                                             color: white; padding: 3px 10px; border-radius: 999px;
+                                             font-weight: bold; font-size: 12px; margin-left: 6px;"
+                                      class="dcto-badge">
+                                    -{{ item.dcto_aplicado }}%
+                                    {% if item.dcto_es_promocional %}(promo){% endif %}
+                                </span>
+                                <div style="color: #8a8f64; font-weight: bold; font-size: 20px; margin-top: 3px;"
+                                     class="precio-final">
+                                    {{ item.precio_final | currency }}
+                                </div>
+                            {% else %}
+                                <div style="color: #8a8f64; font-weight: bold; font-size: 20px;"
+                                     class="precio-final">
+                                    {{ item.precio_final | currency }}
+                                </div>
+                            {% endif %}
+                        </div>
+
                         <p style="color: #aaa; font-size: 11px; margin: 0;">Agregado: {{ item.fecha_agregado }}</p>
                     </div>
 
@@ -43,24 +103,33 @@
                 {% endfor %}
             </div>
 
-            <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #eee;
-                        display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-                <div>
-                    <span style="font-size: 18px; color: #555;">Total:</span>
-                    <span id="total-carrito" style="font-size: 32px; font-weight: bold; color: #8a8f64; margin-left: 10px;">
+            <div style="margin-top: 30px; padding: 20px; background: #f9f9f9; border-radius: 16px;">
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; color: #555;">
+                    <span>Subtotal ({{ cantidad }} artículo{{ 's' if cantidad != 1 else '' }}):</span>
+                    <span id="subtotal-carrito">{{ subtotal | currency }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; color: #c62828;">
+                    <span>Descuentos:</span>
+                    <span id="ahorro-carrito">- {{ ahorro | currency }}</span>
+                </div>
+                <hr style="border: none; border-top: 1px solid #ddd; margin: 10px 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 20px; color: #333;">Total:</span>
+                    <span id="total-carrito" style="font-size: 32px; font-weight: bold; color: #8a8f64;">
                         {{ total | currency }}
                     </span>
                 </div>
-                <div style="display: flex; gap: 10px;">
-                    <button id="btn-vaciar"
-                            style="background: #888; color: white; padding: 12px 24px; border: none;
-                                   border-radius: 12px; cursor: pointer;">
-                        Vaciar carrito
-                    </button>
-                    <a href="/" class="btn" style="background: #8a8f64; padding: 12px 24px; text-decoration: none;">
-                        Seguir comprando
-                    </a>
-                </div>
+            </div>
+
+            <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap;">
+                <button id="btn-vaciar"
+                        style="background: #888; color: white; padding: 12px 24px; border: none;
+                               border-radius: 12px; cursor: pointer;">
+                    Vaciar carrito
+                </button>
+                <a href="/" class="btn" style="background: #8a8f64; padding: 12px 24px; text-decoration: none;">
+                    Seguir comprando
+                </a>
             </div>
         {% else %}
             <div id="carrito-vacio" style="text-align: center; padding: 50px;">
@@ -87,21 +156,53 @@
     }
 
     const msg = document.getElementById('carrito-msg');
-
     function mostrarMsg(texto, ok) {
         msg.textContent = texto;
         msg.style.color = ok ? '#2e7d32' : '#c62828';
         setTimeout(() => { msg.textContent = ''; }, 3500);
     }
 
-    function recalcularTotal() {
+    function descuentoPromocional(cantidad) {
+        if (cantidad >= 4) return 40;
+        if (cantidad === 3) return 30;
+        if (cantidad === 2) return 20;
+        return 0;
+    }
+
+    function recalcular() {
+        const items = Array.from(document.querySelectorAll('.carrito-item'));
+        const cantidad = items.length;
+        const promo = descuentoPromocional(cantidad);
+
+        let subtotal = 0;
         let total = 0;
-        document.querySelectorAll('.carrito-item').forEach(div => {
-            const precioTxt = div.querySelector('p[style*="font-weight: bold"]')?.textContent || '';
-            const limpio = precioTxt.replace(/[^\d]/g, '');
-            if (limpio) total += parseInt(limpio, 10);
+
+        items.forEach(div => {
+            const precioAntes = parseInt(div.dataset.precioAntes || '0', 10);
+            const dctoOriginal = parseInt(div.dataset.dctoOriginal || '0', 10);
+            const dctoAplicado = Math.max(dctoOriginal, promo);
+            const precioFinal = dctoAplicado > 0
+                ? Math.round(precioAntes * (100 - dctoAplicado) / 100)
+                : precioAntes;
+
+            subtotal += precioAntes;
+            total += precioFinal;
+
+            const badge = div.querySelector('.dcto-badge');
+            const precioFinalEl = div.querySelector('.precio-final');
+            if (precioFinalEl) precioFinalEl.textContent = formatCurrency(precioFinal);
+            if (badge) {
+                const esPromo = dctoAplicado === promo && promo > dctoOriginal;
+                badge.textContent = `-${dctoAplicado}% ${esPromo ? '(promo)' : ''}`.trim();
+                badge.style.background = esPromo ? '#8a8f64' : '#c62828';
+            }
         });
+
+        const subtotalEl = document.getElementById('subtotal-carrito');
+        const ahorroEl = document.getElementById('ahorro-carrito');
         const totalEl = document.getElementById('total-carrito');
+        if (subtotalEl) subtotalEl.textContent = formatCurrency(subtotal);
+        if (ahorroEl) ahorroEl.textContent = '- ' + formatCurrency(subtotal - total);
         if (totalEl) totalEl.textContent = formatCurrency(total);
     }
 
@@ -120,7 +221,6 @@
                 if (resp.ok && data.ok) {
                     const div = document.getElementById('item-' + itemId);
                     if (div) div.remove();
-                    recalcularTotal();
                     mostrarMsg('Item eliminado y stock repuesto.', true);
 
                     const badge = document.getElementById('cart-badge');
@@ -130,7 +230,10 @@
                     }
 
                     if (!document.querySelector('.carrito-item')) {
-                        setTimeout(() => window.location.reload(), 800);
+                        setTimeout(() => window.location.reload(), 600);
+                    } else {
+                        // Al cambiar la cantidad el descuento promocional puede cambiar
+                        window.location.reload();
                     }
                 } else {
                     mostrarMsg(data.mensaje || 'No se pudo eliminar.', false);
