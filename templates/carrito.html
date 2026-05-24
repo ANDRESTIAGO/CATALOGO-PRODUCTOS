@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 
-{% block title %} Mi Carrito - MASTER SERIES {% endblock %}
+{% block title %} Reserva {% endblock %}
 
 {% block sidebar %}
-<p>Aquí puedes ver los artículos que has agregado a tu carrito de compras.</p>
+<p>Aquí puedes ver los artículos que has agregado a tu Reserva de compras.</p>
 <div style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 12px;">
     <h4 style="color: #8a8f64; margin-bottom: 10px;">Promociones por cantidad</h4>
     <ul style="font-size: 13px; color: #555; padding-left: 18px; line-height: 1.7;">
@@ -20,9 +20,9 @@
 {% block content %}
 <section class="contenedor" style="padding-top: 40px; padding-bottom: 60px;">
     <div style="max-width: 1000px; margin: 0 auto; background: white; padding: 30px; border-radius: 24px;">
-        <h1 style="color: #8a8f64; margin-bottom: 5px;">🛒 Mi Carrito</h1>
+        <h1 style="color: #8a8f64; margin-bottom: 5px;">🛒 Mi Reserva</h1>
         <p style="color: #777; margin-bottom: 10px;">
-            {{ cantidad }} artículo{{ 's' if cantidad != 1 else '' }} en tu carrito.
+            {{ cantidad }} artículo{{ 's' if cantidad != 1 else '' }} en tu Reserva.
         </p>
 
         {% if dcto_promocional > 0 %}
@@ -49,9 +49,9 @@
         {% endif %}
 
         {% if items %}
-            <div id="carrito-items" style="display: flex; flex-direction: column; gap: 15px;">
+            <div id="Reserva-items" style="display: flex; flex-direction: column; gap: 15px;">
                 {% for item in items %}
-                <div class="carrito-item" id="item-{{ item.id }}"
+                <div class="Reserva-item" id="item-{{ item.id }}"
                      data-precio-antes="{{ item.precio_antes_int }}"
                      data-dcto-original="{{ item.dcto_original_int }}"
                      style="display: grid; grid-template-columns: 100px 1fr auto; gap: 20px; align-items: center;
@@ -106,16 +106,16 @@
             <div style="margin-top: 30px; padding: 20px; background: #f9f9f9; border-radius: 16px;">
                 <div style="display: flex; justify-content: space-between; padding: 6px 0; color: #555;">
                     <span>Subtotal ({{ cantidad }} artículo{{ 's' if cantidad != 1 else '' }}):</span>
-                    <span id="subtotal-carrito">{{ subtotal | currency }}</span>
+                    <span id="subtotal-Reserva">{{ subtotal | currency }}</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; padding: 6px 0; color: #c62828;">
                     <span>Descuentos:</span>
-                    <span id="ahorro-carrito">- {{ ahorro | currency }}</span>
+                    <span id="ahorro-Reserva">- {{ ahorro | currency }}</span>
                 </div>
                 <hr style="border: none; border-top: 1px solid #ddd; margin: 10px 0;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <span style="font-size: 20px; color: #333;">Total:</span>
-                    <span id="total-carrito" style="font-size: 32px; font-weight: bold; color: #8a8f64;">
+                    <span id="total-Reserva" style="font-size: 32px; font-weight: bold; color: #8a8f64;">
                         {{ total | currency }}
                     </span>
                 </div>
@@ -125,7 +125,7 @@
                 <button id="btn-vaciar"
                         style="background: #888; color: white; padding: 12px 24px; border: none;
                                border-radius: 12px; cursor: pointer;">
-                    Vaciar carrito
+                    Vaciar Reserva
                 </button>
                 <a href="/" class="btn" style="background: #8a8f64; padding: 12px 24px; text-decoration: none;text-align: center">
                     Seguir comprando
@@ -227,9 +227,9 @@
                 </div>
             </div>
         {% else %}
-            <div id="carrito-vacio" style="text-align: center; padding: 50px;">
+            <div id="Reserva-vacio" style="text-align: center; padding: 50px;">
                 <div style="font-size: 70px; margin-bottom: 20px;">🛒</div>
-                <h3 style="color: #555;">Tu carrito está vacío</h3>
+                <h3 style="color: #555;">No tienes reservas aún</h3>
                 <p style="color: #888; margin-bottom: 25px;">Agrega artículos desde el catálogo para verlos aquí.</p>
                 <a href="/" class="btn" style="background: #8a8f64; display: inline-block; padding: 12px 30px; text-decoration: none;">
                     Ir al Catálogo
@@ -237,7 +237,7 @@
             </div>
         {% endif %}
 
-        <p id="carrito-msg" style="margin-top: 15px; text-align: center; min-height: 20px;"></p>
+        <p id="Reserva-msg" style="margin-top: 15px; text-align: center; min-height: 20px;"></p>
     </div>
 </section>
 
@@ -250,7 +250,7 @@
         return `$${formatted}`;
     }
 
-    const msg = document.getElementById('carrito-msg');
+    const msg = document.getElementById('Reserva-msg');
     function mostrarMsg(texto, ok) {
         msg.textContent = texto;
         msg.style.color = ok ? '#2e7d32' : '#c62828';
@@ -265,7 +265,7 @@
     }
 
     function recalcular() {
-        const items = Array.from(document.querySelectorAll('.carrito-item'));
+        const items = Array.from(document.querySelectorAll('.Reserva-item'));
         const cantidad = items.length;
         const promo = descuentoPromocional(cantidad);
 
@@ -293,9 +293,9 @@
             }
         });
 
-        const subtotalEl = document.getElementById('subtotal-carrito');
-        const ahorroEl = document.getElementById('ahorro-carrito');
-        const totalEl = document.getElementById('total-carrito');
+        const subtotalEl = document.getElementById('subtotal-Reserva');
+        const ahorroEl = document.getElementById('ahorro-Reserva');
+        const totalEl = document.getElementById('total-Reserva');
         if (subtotalEl) subtotalEl.textContent = formatCurrency(subtotal);
         if (ahorroEl) ahorroEl.textContent = '- ' + formatCurrency(subtotal - total);
         if (totalEl) totalEl.textContent = formatCurrency(total);
@@ -310,13 +310,13 @@
             try {
                 const fd = new FormData();
                 fd.append('item_id', itemId);
-                const resp = await fetch('/carrito/eliminar', { method: 'POST', body: fd });
+                const resp = await fetch('/Reserva/eliminar', { method: 'POST', body: fd });
                 const data = await resp.json();
 
                 if (resp.ok && data.ok) {
                     const div = document.getElementById('item-' + itemId);
                     if (div) div.remove();
-                    mostrarMsg('Item eliminado del carrito.', true);
+                    mostrarMsg('Item eliminado del Reserva.', true);
 
                     const badge = document.getElementById('cart-badge');
                     if (badge && typeof data.total_items === 'number') {
@@ -324,7 +324,7 @@
                         badge.style.display = data.total_items > 0 ? 'inline-block' : 'none';
                     }
 
-                    if (!document.querySelector('.carrito-item')) {
+                    if (!document.querySelector('.Reserva-item')) {
                         setTimeout(() => window.location.reload(), 600);
                     } else {
                         // Al cambiar la cantidad el descuento promocional puede cambiar
@@ -346,24 +346,24 @@
     const btnVaciar = document.getElementById('btn-vaciar');
     if (btnVaciar) {
         btnVaciar.addEventListener('click', async () => {
-            if (!confirm('¿Vaciar todo el carrito?')) return;
+            if (!confirm('¿Vaciar todo el Reserva?')) return;
             btnVaciar.disabled = true;
             btnVaciar.textContent = 'Vaciando...';
 
             try {
-                const resp = await fetch('/carrito/vaciar', { method: 'POST' });
+                const resp = await fetch('/Reserva/vaciar', { method: 'POST' });
                 const data = await resp.json();
                 if (resp.ok && data.ok) {
                     window.location.reload();
                 } else {
                     mostrarMsg(data.mensaje || 'No se pudo vaciar.', false);
                     btnVaciar.disabled = false;
-                    btnVaciar.textContent = 'Vaciar carrito';
+                    btnVaciar.textContent = 'Vaciar Reserva';
                 }
             } catch {
                 mostrarMsg('Error de conexión.', false);
                 btnVaciar.disabled = false;
-                btnVaciar.textContent = 'Vaciar carrito';
+                btnVaciar.textContent = 'Vaciar Reserva';
             }
         });
     }
@@ -414,7 +414,7 @@
                     fd.set('acepta_tratamiento', chkTratamiento && chkTratamiento.checked ? 'on' : '');
                 }
 
-                const resp = await fetch('/carrito/reservar', { method: 'POST', body: fd });
+                const resp = await fetch('/Reserva/reservar', { method: 'POST', body: fd });
                 const data = await resp.json();
 
                 if (resp.ok && data.ok) {

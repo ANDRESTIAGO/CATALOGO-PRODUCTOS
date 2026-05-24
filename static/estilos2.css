@@ -234,7 +234,7 @@ button:hover {
 .filters-container {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 5px;
   background: none;
   padding: 0;
   margin: 0;
@@ -250,7 +250,7 @@ button:hover {
   background: white;
   z-index: 1100;
   transition: right 0.3s ease-in-out;
-  padding: 30px 20px;
+  padding: 14px 16px;
   box-shadow: -5px 0 15px rgba(0,0,0,0.1);
   overflow-y: auto;
 }
@@ -263,20 +263,20 @@ button:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 25px;
+  margin-bottom: 10px;
   border-bottom: 2px solid #8a8f64;
-  padding-bottom: 10px;
+  padding-bottom: 8px;
 }
 
 .sidebar-header h2 {
   margin: 0;
-  font-size: 20px;
+  font-size: 16px;
 }
 
 .close-sidebar {
   background: none;
   border: none;
-  font-size: 32px;
+  font-size: 24px;
   cursor: pointer;
   color: #444;
   width: auto;
@@ -381,11 +381,11 @@ button:hover {
 }
 
 .filter-select {
-  padding: 12px;
-  border-radius: 14px;
+  padding: 6px 10px;
+  border-radius: 10px;
   border: 1px solid rgba(138, 143, 100, 0.3);
   background: white;
-  font-size: 14px;
+  font-size: 13px;
   width: 100%;
 }
 

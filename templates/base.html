@@ -3,17 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %} FastComponents {% endblock %}</title>
+    <title>{% block title %} MasterClick {% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', path='estilos2.css') }}">
 </head>
 <body>
     {% include 'includes/navbar.html' %}
     
-    <!-- Botón Flotante para Filtros (Siempre visible) -->
-    <button id="openFilters" class="fixed-hamburger-btn">
-        <span>&#9776;</span>
-        <span class="btn-text">Filtros</span>
-    </button>
+    <!-- Botón Flotante para Filtros (solo en páginas que lo activen) -->
+    {% block filter_button %}{% endblock %}
 
     <!-- Sidebar para Filtros -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
