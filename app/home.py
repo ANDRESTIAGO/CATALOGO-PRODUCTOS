@@ -109,7 +109,7 @@ def get_filtros_completos(df, q=None, tipo_producto=None, categoria=None,
         if edad and skip != 'edad':
             df_f = df_f[df_f['Edad'] == edad]
         if talla and skip != 'talla':
-            df_f = df_f[df_f['Talla'] == talla]
+            df_f = df_f[df_f['TallaUSCO'] == talla]
         return df_f
 
     def _valores_unicos(df_in, columna):
@@ -126,7 +126,7 @@ def get_filtros_completos(df, q=None, tipo_producto=None, categoria=None,
         "generos":        _valores_unicos(filtrar(df, 'genero'),        "Genero"),
         "deportes":       _valores_unicos(filtrar(df, 'deporte'),       "Deporte"),
         "edades":         _valores_unicos(filtrar(df, 'edad'),          "Edad"),
-        "tallas":         _valores_unicos(filtrar(df, 'talla'),         "Talla"),
+        "tallas":         _valores_unicos(filtrar(df, 'talla'),         "TallaUSCO"),
     }
 
 
@@ -196,7 +196,7 @@ async def api_productos(
     if edad:
         df = df[df['Edad'] == edad]
     if talla:
-        df = df[df['Talla'] == talla]
+        df = df[df['TallaUSCO'] == talla]
 
     df_unique = df.drop_duplicates(subset=['Referencia'])
 
@@ -259,7 +259,7 @@ async def buscar_productos(
     if edad:
         df = df[df['Edad'] == edad]
     if talla:
-        df = df[df['Talla'] == talla]
+        df = df[df['TallaUSCO'] == talla]
 
     df_unique = df.drop_duplicates(subset=['Referencia'])
 

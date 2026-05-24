@@ -48,12 +48,86 @@
             </select>
 
             <label style="font-weight: bold; margin-bottom: 5px;">Talla</label>
-            <select name="talla" class="filter-select" onchange="this.form.submit()">
-                <option value="">Todas las Tallas</option>
-                {% for t in filtros.tallas %}
-                    <option value="{{ t }}">{{ t }}</option>
-                {% endfor %}
-            </select>
+            <div class="custom-talla-dropdown" style="position: relative; width: 100%;">
+                <div id="talla-trigger" class="filter-select" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                    <span>{{ sel_talla or 'Todas las Tallas' }}</span>
+                    <span style="font-size: 10px; color: #8a8f64;">▼</span>
+                </div>
+                <div id="talla-options-wrapper" style="display: none; position: absolute; top: 100%; left: 0; width: 100%; background: white; border: 1px solid rgba(138, 143, 100, 0.3); border-radius: 10px; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.1); padding: 5px; max-height: 250px; flex-direction: column;">
+                    <input type="text" id="talla-search-unified" placeholder="Buscar talla..." class="filter-select" style="margin-bottom: 5px; height: 30px; font-size: 12px; padding: 5px;">
+                    <div id="talla-options-list" style="overflow-y: auto; flex: 1;">
+                        <div class="talla-option-item" data-value="" style="padding: 8px 10px; font-size: 13px; cursor: pointer; border-radius: 5px;">Todas las Tallas</div>
+                        {% for t in filtros.tallas %}
+                            <div class="talla-option-item" data-value="{{ t }}" style="padding: 8px 10px; font-size: 13px; cursor: pointer; border-radius: 5px; {% if sel_talla == t %}background: #8a8f64; color: white;{% endif %}">{{ t }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <input type="hidden" name="talla" id="talla-hidden-input" value="{{ sel_talla or '' }}">
+            </div>
+
+            <script>
+                (function() {
+                    const trigger = document.getElementById('talla-trigger');
+                    const wrapper = document.getElementById('talla-options-wrapper');
+                    const searchInput = document.getElementById('talla-search-unified');
+                    const optionsList = document.getElementById('talla-options-list');
+                    const hiddenInput = document.getElementById('talla-hidden-input');
+                    const form = document.getElementById('filter-form');
+
+                    trigger.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const isVisible = wrapper.style.display === 'flex';
+                        wrapper.style.display = isVisible ? 'none' : 'flex';
+                        if (!isVisible) {
+                            searchInput.value = '';
+                            const items = optionsList.querySelectorAll('.talla-option-item');
+                            items.forEach(item => item.style.display = "");
+                            setTimeout(() => searchInput.focus(), 10);
+                        }
+                    });
+
+                    searchInput.addEventListener('click', (e) => e.stopPropagation());
+
+                    searchInput.addEventListener('input', function() {
+                        const busqueda = this.value.toLowerCase();
+                        const items = optionsList.querySelectorAll('.talla-option-item');
+                        items.forEach(item => {
+                            const texto = item.textContent.toLowerCase();
+                            item.style.display = texto.includes(busqueda) ? "" : "none";
+                        });
+                    });
+
+                    optionsList.addEventListener('click', (e) => {
+                        const item = e.target.closest('.talla-option-item');
+                        if (item) {
+                            hiddenInput.value = item.dataset.value;
+                            form.submit();
+                        }
+                    });
+
+                    document.addEventListener('click', (e) => {
+                        if (!trigger.contains(e.target) && !wrapper.contains(e.target)) {
+                            wrapper.style.display = 'none';
+                        }
+                    });
+
+                    // Estilos hover para items
+                    optionsList.querySelectorAll('.talla-option-item').forEach(item => {
+                        item.addEventListener('mouseenter', () => {
+                            if (item.dataset.value !== hiddenInput.value) {
+                                item.style.background = '#f0f0f0';
+                                item.style.color = '#8a8f64';
+                            }
+                        });
+                        item.addEventListener('mouseleave', () => {
+                            if (item.dataset.value !== hiddenInput.value) {
+                                item.style.background = '';
+                                item.style.color = '';
+                            }
+                        });
+                    });
+                })();
+            </script>
 
             <br>
             <button type="submit" class="btn" style="margin-bottom: 10px;">Aplicar Filtros</button>
