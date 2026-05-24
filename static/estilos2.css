@@ -825,6 +825,21 @@ button:hover {
     width: 100%;
 }
 
+/* TABLET: apila la imagen sobre los detalles para evitar que se recorte */
+@media (min-width: 769px) and (max-width: 1100px) {
+    .product-detail-grid {
+        grid-template-columns: 1fr;
+    }
+    .product-detail-grid > div:first-child {
+        min-height: 420px;
+    }
+    .product-detail-grid > div:first-child img {
+        width: 100%;
+        height: 420px;
+        object-fit: contain;
+    }
+}
+
 /* RESPONSIVE AGRESIVO */
 @media (max-width: 768px) {
     .header-container {
