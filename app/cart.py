@@ -393,7 +393,19 @@ async def reservar_carrito(
         "precio_unitario": it.get("precio_final", 0),
         "cantidad": int(it.get("cantidad", 1) or 1),
     } for it in items_calc]
-    reserva_id = db.guardar_reserva(usuario, datos_cliente, items_reserva)
+
+    # Código de referido: lo tomamos de la sesión (lo seteamos en login/registro).
+    # Fallback: leerlo desde la tabla `usuarios` por si la sesión es antigua y
+    # no tiene el campo cacheado.
+    codigo_referido = (request.session.get("referral_code") or "").strip()
+    if not codigo_referido:
+        u = db.obtener_usuario(usuario) or {}
+        codigo_referido = str(u.get("codigo_referido") or "").strip()
+
+    reserva_id = db.guardar_reserva(
+        usuario, datos_cliente, items_reserva,
+        codigo_referido=codigo_referido,
+    )
 
     # Descontar inventario en disco y en memoria
     for (ref, talla, ciudad_item), cantidad in agrupado.items():

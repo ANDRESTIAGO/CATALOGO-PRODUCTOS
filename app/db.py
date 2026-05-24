@@ -338,10 +338,14 @@ def vaciar_carrito(usuario):
 
 # ----------------------- RESERVAS -----------------------
 
-def guardar_reserva(usuario, datos_cliente: dict, items: list) -> int:
+def guardar_reserva(usuario, datos_cliente: dict, items: list,
+                    codigo_referido: str = "") -> int:
     """
     Persiste una reserva en `reservas`: una fila por item, todas comparten
     el mismo `reserva_id` (tomado de la secuencia `reservas_reserva_id_seq`).
+
+    El `codigo_referido` se guarda en cada fila (artículo) para poder
+    atribuir cada reserva al empleado/promotor que refirió al cliente.
     """
     with _get_conn() as conn:
         with conn.cursor() as cur:
@@ -356,9 +360,9 @@ def guardar_reserva(usuario, datos_cliente: dict, items: list) -> int:
                            (reserva_id, usuario, nombre, apellido, cedula,
                             correo, celular, direccion, ciudad_envio,
                             referencia, talla, ciudad_item, nombre_producto,
-                            precio_unitario, cantidad, subtotal)
+                            precio_unitario, cantidad, subtotal, codigo_referido)
                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s,
-                               %s, %s, %s, %s, %s, %s, %s)""",
+                               %s, %s, %s, %s, %s, %s, %s, %s)""",
                     (
                         reserva_id,
                         str(usuario),
@@ -376,6 +380,7 @@ def guardar_reserva(usuario, datos_cliente: dict, items: list) -> int:
                         precio_unit,
                         cantidad,
                         precio_unit * cantidad,
+                        str(codigo_referido or "").strip(),
                     ),
                 )
         conn.commit()

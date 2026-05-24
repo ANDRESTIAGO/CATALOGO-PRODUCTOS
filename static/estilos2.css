@@ -496,6 +496,16 @@ button:hover {
   display: block;
 }
 
+/* Subtítulo de edad debajo del nombre del producto en la cuadrícula */
+.product-edad {
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #888;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
 /* En pantallas móviles las tarjetas se hacen más anchas que altas
    relativamente, así que damos un poco más de altura al área de imagen
    para que las prendas verticales se vean bien proporcionadas. */

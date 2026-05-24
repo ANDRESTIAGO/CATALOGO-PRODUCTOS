@@ -419,6 +419,9 @@
                 <div class="product-info">
                     <p class="product-ref">REF: {{ producto.Referencia }}</p>
                     <h3 class="product-name">{{ producto.nombre }}</h3>
+                    {% if producto.Edad %}
+                    <p class="product-edad">{{ producto.Edad }}</p>
+                    {% endif %}
                     <BR></BR>
                     <div class="price-row" style="position: relative;">
                         {% if producto['%DCTO'] and producto['%DCTO'] != '0' and producto['%DCTO'] != '0%' %}
@@ -510,6 +513,7 @@
                             <div class="product-info">
                                 <p class="product-ref">REF: ${producto.Referencia}</p>
                                 <h3 class="product-name">${producto.nombre}</h3>
+                                ${producto.Edad ? `<p class="product-edad">${producto.Edad}</p>` : ''}
                                 <BR></BR>
                                 <div class="price-row" style="position: relative;">
                                     ${producto['%DCTO'] && producto['%DCTO'] != '0' && producto['%DCTO'] != '0%' ? `
