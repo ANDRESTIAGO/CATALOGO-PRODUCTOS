@@ -20,9 +20,9 @@
 {% block content %}
 <section class="contenedor" style="padding-top: 40px; padding-bottom: 60px;">
     <div style="max-width: 1000px; margin: 0 auto; background: white; padding: 30px; border-radius: 24px;">
-        <h1 style="color: #8a8f64; margin-bottom: 5px;">🛒 Mi Reserva</h1>
+        <h1 style="color: #8a8f64; margin-bottom: 5px;">🛒 Mi Orden</h1>
         <p style="color: #777; margin-bottom: 10px;">
-            {{ cantidad }} artículo{{ 's' if cantidad != 1 else '' }} en tu Reserva.
+            {{ cantidad }} artículo{{ 's' if cantidad != 1 else '' }} en tu Orden.
         </p>
 
         {% if dcto_promocional > 0 %}
@@ -229,7 +229,7 @@
         {% else %}
             <div id="Reserva-vacio" style="text-align: center; padding: 50px;">
                 <div style="font-size: 70px; margin-bottom: 20px;">🛒</div>
-                <h3 style="color: #555;">No tienes reservas aún</h3>
+                <h3 style="color: #555;">No tienes artículos en tu orden</h3>
                 <p style="color: #888; margin-bottom: 25px;">Agrega artículos desde el catálogo para verlos aquí.</p>
                 <a href="/" class="btn" style="background: #8a8f64; display: inline-block; padding: 12px 30px; text-decoration: none;">
                     Ir al Catálogo
@@ -310,7 +310,7 @@
             try {
                 const fd = new FormData();
                 fd.append('item_id', itemId);
-                const resp = await fetch('/Reserva/eliminar', { method: 'POST', body: fd });
+                const resp = await fetch('/carrito/eliminar', { method: 'POST', body: fd });
                 const data = await resp.json();
 
                 if (resp.ok && data.ok) {
@@ -351,7 +351,7 @@
             btnVaciar.textContent = 'Vaciando...';
 
             try {
-                const resp = await fetch('/Reserva/vaciar', { method: 'POST' });
+                const resp = await fetch('/carrito/vaciar', { method: 'POST' });
                 const data = await resp.json();
                 if (resp.ok && data.ok) {
                     window.location.reload();
@@ -414,7 +414,7 @@
                     fd.set('acepta_tratamiento', chkTratamiento && chkTratamiento.checked ? 'on' : '');
                 }
 
-                const resp = await fetch('/Reserva/reservar', { method: 'POST', body: fd });
+                const resp = await fetch('/carrito/reservar', { method: 'POST', body: fd });
                 const data = await resp.json();
 
                 if (resp.ok && data.ok) {
