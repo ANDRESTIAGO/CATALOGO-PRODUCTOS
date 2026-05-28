@@ -225,9 +225,8 @@
             <!-- Modal de confirmación final (Diseño idéntico al anterior) -->
             <div id="modal-confirmacion-final" class="reserva-modal-overlay">
                 <div class="reserva-modal-card" style="max-width: 420px; text-align: center;">
-                    <h2 style="color: #c62828;">¿Confirmar Orden?</h2>
+                    <h2 style="color: #c62828;">¿Está seguro de realizar su reserva?</h2>
                     <p class="reserva-subtitle" style="margin: 15px 0 20px 0; font-size: 15px;">
-                        ¿Está seguro de realizar su reserva? <br>
                         <strong>Una vez reserve no podrá agregar nada más a su Orden.</strong>
                     </p>
                     <div class="reserva-btns" style="justify-content: center; gap: 15px;">
@@ -236,6 +235,21 @@
                         </button>
                         <button type="button" id="btn-confirmar-final" class="reserva-btn-confirm" style="flex: 1; background: #2e7d32;">
                             Sí, reservar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal de Éxito (Mismo diseño) -->
+            <div id="modal-exito-reserva" class="reserva-modal-overlay">
+                <div class="reserva-modal-card" style="max-width: 420px; text-align: center;">
+                    <h2 style="color: #2e7d32;">Orden enviada!</h2>
+                    <p class="reserva-subtitle" style="margin: 15px 0 20px 0; font-size: 15px;">
+                        Próximamente personal de master series se pondrá en contacto con tigo para confirmar los artículos, costo de envío y realizar el pago.
+                    </p>
+                    <div class="reserva-btns" style="justify-content: center;">
+                        <button type="button" id="btn-entendido-exito" class="reserva-btn-confirm" style="flex: 1; background: #8a8f64;">
+                            Entendido
                         </button>
                     </div>
                 </div>
@@ -486,13 +500,26 @@
 
                 if (resp.ok && data.ok) {
                     cerrarModal();
-                    mostrarMsg('✅ ' + data.mensaje, true);
+                    
+                    // Mostrar modal de éxito
+                    const modalExito = document.getElementById('modal-exito-reserva');
+                    const btnEntendido = document.getElementById('btn-entendido-exito');
+                    
+                    if (modalExito && btnEntendido) {
+                        modalExito.classList.add('active');
+                        btnEntendido.addEventListener('click', () => {
+                            window.location.reload();
+                        });
+                    } else {
+                        mostrarMsg('✅ ' + data.mensaje, true);
+                        setTimeout(() => window.location.reload(), 2000);
+                    }
+
                     const badge = document.getElementById('cart-badge');
                     if (badge) {
                         badge.textContent = '0';
                         badge.style.display = 'none';
                     }
-                    setTimeout(() => window.location.reload(), 1500);
                 } else {
                     mostrarMsg(data.mensaje || 'No se pudo reservar.', false);
                     btnConfirmarReserva.disabled = false;
