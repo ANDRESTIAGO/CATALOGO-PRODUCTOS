@@ -449,7 +449,7 @@
                     <BR></BR>
                     <div class="price-row" style="position: relative;">
                         {% if producto['%DCTO'] and producto['%DCTO'] != '0' and producto['%DCTO'] != '0%' %}
-                        <span class="old-price" style="text-decoration: line-through">Precio original: {{ producto['precio_antes'] | currency }}</span>
+                        <span class="old-price"> Precio original: <span style="text-decoration: line-through;"> {{ producto['precio_antes'] | currency }} </span> </span>
                         <span style="background: #8a8f64; color: white; padding: 5px 12px; border-radius: 999px; font-weight: bold; position: absolute; right: 0; bottom: 0;" class="discount-badge">Dcto: {{ producto['%DCTO'] }}</span>
                         {% endif %}
                     </div>
