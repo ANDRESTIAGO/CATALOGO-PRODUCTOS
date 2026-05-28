@@ -357,6 +357,12 @@ async def buscar_productos(
     })
 
 
+@router.get("/terminos", response_class=HTMLResponse)
+async def terminos(request: Request):
+    templates = request.app.state.templates
+    return templates.TemplateResponse(request, "terminos.html", {})
+
+
 @router.get("/producto/{referencia}", response_class=HTMLResponse)
 async def detalle_producto(request: Request, referencia: str):
     templates = request.app.state.templates
